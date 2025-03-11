@@ -5,7 +5,7 @@ import { useAppContext } from "../../context/AppContext";
 
 export default function Navbar() {
   const { openSignIn } = useClerk();
-  const { navigate } = useAppContext();
+  const { navigate, isEducator } = useAppContext();
   const isCoursesList = location.pathname.includes("course-list");
 
   return (
@@ -25,7 +25,9 @@ export default function Navbar() {
       <div className="hidden md:flex items-center gap-5 text-gray-500">
         <div className="flex items-center gap-5">
           <SignedIn>
-            <button>Become educator</button>
+            <button onClick={() => navigate("/educator")} className="cursor-pointer">
+              {isEducator ? "Educator dashboard" : "Become educator"}
+            </button>
             <Link to={"/my-enrollments"}>My enrollments</Link>
           </SignedIn>
         </div>

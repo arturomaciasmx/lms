@@ -8,6 +8,8 @@ type AppContextType = {
   allCourses: Course[];
   navigate: NavigateFunction;
   calculateRating: (course: Course) => number;
+  setIsEducator?: React.Dispatch<React.SetStateAction<boolean>>;
+  isEducator?: boolean;
 };
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -17,6 +19,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const navigate = useNavigate();
 
   const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [isEducator, setIsEducator] = useState(true);
 
   // Fetch all courses
   const fetchAllCourses = async () => {
@@ -43,6 +46,8 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     allCourses,
     navigate,
     calculateRating,
+    setIsEducator,
+    isEducator,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

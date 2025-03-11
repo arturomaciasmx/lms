@@ -36,3 +36,11 @@ export type Course = {
   __v: number;
   courseThumbnail: string;
 };
+
+export type Testimonial = {
+  name: string;
+  role: string;
+  image: string;
+  rating: number;
+  feedback: string;
+};

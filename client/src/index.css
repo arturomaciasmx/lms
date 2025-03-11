@@ -4,3 +4,9 @@
 @theme {
   --font-sans: 'Outfit', sans-serif;
 }
+
+@layer components {
+  h2 {
+    @apply text-3xl font-medium text-gray-800;
+  }
+}
