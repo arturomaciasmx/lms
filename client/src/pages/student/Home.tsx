@@ -1,7 +1,6 @@
 import CallToAction from "../../components/student/CallToAction";
 import Companies from "../../components/student/Companies";
 import CoursesSection from "../../components/student/CoursesSection";
-import Footer from "../../components/student/Footer";
 import Hero from "../../components/student/Hero";
 import TestimonialSection from "../../components/student/TestimonialsSection";
 
@@ -13,7 +12,6 @@ export default function Home() {
       <CoursesSection />
       <TestimonialSection />
       <CallToAction />
-      <Footer />
     </>
   );
 }

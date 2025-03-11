@@ -17,7 +17,7 @@ export default function CoursesSection() {
         ))}
       </div>
       <Link
-        to={"/courses-list"}
+        to={"/course-list"}
         onClick={() => {
           scrollTo(0, 0);
         }}

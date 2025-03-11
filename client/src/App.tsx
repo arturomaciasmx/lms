@@ -11,6 +11,7 @@ import AddCourse from "./pages/educator/AddCourse";
 import MyCourses from "./pages/educator/MyCourses";
 import StudentsEnrolled from "./pages/educator/StudentsEnrolled";
 import Navbar from "./components/student/Navbar";
+import Footer from "./components/student/Footer";
 
 function App() {
   const isEducatorRoute = useMatch("/educator/*");
@@ -35,6 +36,7 @@ function App() {
           <Route path="student-enrolled" element={<StudentsEnrolled />} />
         </Route>
       </Routes>
+      {!isEducatorRoute && <Footer />}
     </div>
   );
 }
