@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Course } from "../types";
+import { Chapter, ChapterContent, Course } from "../types";
 import { dummyCourses } from "../assets/assets";
 import { type NavigateFunction, useNavigate } from "react-router-dom";
+import humanizeDuration from "humanize-duration";
 
 type AppContextType = {
   currency?: string;
@@ -10,6 +11,9 @@ type AppContextType = {
   calculateRating: (course: Course) => number;
   setIsEducator?: React.Dispatch<React.SetStateAction<boolean>>;
   isEducator?: boolean;
+  calculateChapterDuration: (chapter: Chapter) => string;
+  calculateCourseDuration: (course: Course) => string;
+  calcutateTotalChapters: (course: Course) => number;
 };
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -41,6 +45,37 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     fetchAllCourses();
   }, []);
 
+  const calculateChapterDuration = (chapter: Chapter) => {
+    let duration = 0;
+
+    chapter.chapterContent.map((content: ChapterContent) => {
+      duration += content.lectureDuration;
+    });
+
+    return humanizeDuration(duration * 60 * 1000, { units: ["h", "m"] });
+  };
+
+  const calculateCourseDuration = (course: Course) => {
+    let duration = 0;
+    course.courseContent.forEach((chapter) => {
+      chapter.chapterContent.map((content: ChapterContent) => {
+        duration = duration += content.lectureDuration;
+      });
+    });
+
+    return humanizeDuration(duration * 60 * 1000, { units: ["h", "m"] });
+  };
+
+  const calcutateTotalChapters = (course: Course) => {
+    let totalCourses = 0;
+
+    course.courseContent.forEach((chapter) => {
+      totalCourses += chapter.chapterContent.length;
+    });
+
+    return totalCourses;
+  };
+
   const value: AppContextType = {
     currency,
     allCourses,
@@ -48,6 +83,9 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     calculateRating,
     setIsEducator,
     isEducator,
+    calculateChapterDuration,
+    calculateCourseDuration,
+    calcutateTotalChapters,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

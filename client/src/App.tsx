@@ -17,7 +17,7 @@ function App() {
   const isEducatorRoute = useMatch("/educator/*");
 
   return (
-    <div className=" min-h-screen bg-white">
+    <div className=" min-h-screen">
       {!isEducatorRoute && <Navbar />}
 
       <Routes>
