@@ -14,6 +14,8 @@ type AppContextType = {
   calculateChapterDuration: (chapter: Chapter) => string;
   calculateCourseDuration: (course: Course) => string;
   calcutateTotalChapters: (course: Course) => number;
+  enrolledCourses: Course[];
+  fetchEnrolledCourses: () => void;
 };
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -24,6 +26,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
 
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [isEducator, setIsEducator] = useState(true);
+  const [enrolledCourses, setEnroledCourses] = useState<Course[]>([]);
 
   // Fetch all courses
   const fetchAllCourses = async () => {
@@ -41,8 +44,14 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     return totalRating / course.courseRatings.length;
   };
 
+  // fetch enrolled courses
+  const fetchEnrolledCourses = async () => {
+    setEnroledCourses(dummyCourses);
+  };
+
   useEffect(() => {
     fetchAllCourses();
+    fetchEnrolledCourses();
   }, []);
 
   const calculateChapterDuration = (chapter: Chapter) => {
@@ -86,6 +95,8 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     calculateChapterDuration,
     calculateCourseDuration,
     calcutateTotalChapters,
+    fetchEnrolledCourses,
+    enrolledCourses,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
