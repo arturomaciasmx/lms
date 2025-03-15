@@ -12,7 +12,9 @@ export default function CourseDetails() {
   const [courseData, setCourseData] = useState<null | Course>(null);
   const [openSections, setOpenSections] = useState<{ [key: number]: boolean }>({});
   const [isAreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
-  const [playerData, setPlayerData] = useState<{ [key: string]: string } | null>(null);
+  const [playerData, setPlayerData] = useState<{ [key: string]: string | null } | null>(
+    null
+  );
 
   const {
     allCourses,
@@ -120,7 +122,8 @@ export default function CourseDetails() {
                                 className="text-blue-500 cursor-pointer"
                                 onClick={() =>
                                   setPlayerData({
-                                    videoId: chapterContent.lectureUrl.split("/").pop(),
+                                    videoId:
+                                      chapterContent.lectureUrl.split("/").pop() || null,
                                   })
                                 }
                               >
