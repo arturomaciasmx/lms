@@ -6,6 +6,7 @@ import Loading from "../../components/student/Loading";
 import { assets } from "../../assets/assets";
 import humanizeDuration from "humanize-duration";
 import YouTube from "react-youtube";
+import Rating from "../../components/student/Rating";
 
 type playerContentType = ChapterContent & {
   [key: string]: string | number | boolean | null;
@@ -112,6 +113,11 @@ export default function Player() {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="flex items-center gap-2 py-3 mt-10">
+            <h2 className="text-2xl">Rate this course</h2>
+            <Rating initialRating={0} />
           </div>
         </div>
         {/* right column */}
