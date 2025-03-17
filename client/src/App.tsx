@@ -31,7 +31,7 @@ function App() {
 
         <Route path="/educator" element={<Educator />}>
           <Route path="educator" element={<Dashboard />} />
-          <Route path="add-course" element={<AddCourse />} />
+          <Route path="add-courses" element={<AddCourse />} />
           <Route path="my-courses" element={<MyCourses />} />
           <Route path="student-enrolled" element={<StudentsEnrolled />} />
         </Route>
