@@ -13,6 +13,8 @@ export type ChapterContent = {
   lectureOrder: number;
 };
 
+export type LectureDetail = Omit<ChapterContent, "lectureId" | "lectureOrder">;
+
 export type Chapter = {
   chapterId: string;
   chapterOrder: number;
@@ -49,11 +51,19 @@ export type DashboardData = {
   totalEarnings: number;
   enrolledStudentsData: {
     courseTitle: string;
-    student: {
-      _id: string;
-      name: string;
-      imageUrl: string;
-    };
+    student: Student;
   }[];
   totalCourses: number;
+};
+
+export type Student = {
+  _id: string;
+  name: string;
+  imageUrl: string;
+};
+
+export type StudentEnrolled = {
+  student: Student;
+  courseTitle: string;
+  purchaseDate: string;
 };

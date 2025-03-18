@@ -13,6 +13,8 @@ import StudentsEnrolled from "./pages/educator/StudentsEnrolled";
 import Navbar from "./components/student/Navbar";
 import Footer from "./components/student/Footer";
 
+import "quill/dist/quill.snow.css";
+
 function App() {
   const isEducatorRoute = useMatch("/educator/*");
 
