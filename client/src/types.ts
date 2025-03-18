@@ -44,3 +44,16 @@ export type Testimonial = {
   rating: number;
   feedback: string;
 };
+
+export type DashboardData = {
+  totalEarnings: number;
+  enrolledStudentsData: {
+    courseTitle: string;
+    student: {
+      _id: string;
+      name: string;
+      imageUrl: string;
+    };
+  }[];
+  totalCourses: number;
+};
