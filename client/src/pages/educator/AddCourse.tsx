@@ -1,4 +1,4 @@
-import { ReactEventHandler, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Chapter, ChapterContent, LectureDetail } from "../../types";
 import uniqid from "uniqid";
 import Quill from "quill";
