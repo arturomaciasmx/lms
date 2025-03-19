@@ -3,6 +3,7 @@ import { Chapter, ChapterContent, Course } from "../types";
 import { dummyCourses } from "../assets/assets";
 import { type NavigateFunction, useNavigate } from "react-router-dom";
 import humanizeDuration from "humanize-duration";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 type AppContextType = {
   currency?: string;
@@ -23,6 +24,9 @@ export const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
   const currency = import.meta.env.VITE_CURRENCY || "USD";
   const navigate = useNavigate();
+
+  const { getToken } = useAuth();
+  const { user } = useUser();
 
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [isEducator, setIsEducator] = useState(true);
@@ -53,6 +57,16 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     fetchAllCourses();
     fetchEnrolledCourses();
   }, []);
+
+  const logToken = async () => {
+    console.log(await getToken());
+  };
+
+  useEffect(() => {
+    if (user) {
+      logToken();
+    }
+  }, [user]);
 
   const calculateChapterDuration = (chapter: Chapter) => {
     let duration = 0;
