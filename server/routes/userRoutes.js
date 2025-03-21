@@ -1,5 +1,5 @@
 import express from "express";
-import { getUserData, getUserEnrolledCourses } from "../controllers/userController.js";
+import { getUserData, getUserEnrolledCourses, purchaseCourse } from "../controllers/userController.js";
 
 const userRouter = express.Router();
 
@@ -7,5 +7,7 @@ const userRouter = express.Router();
 userRouter.get("/data", getUserData);
 // get enrolled courses
 userRouter.get("/enrolled-courses", getUserEnrolledCourses);
+// purchase
+userRouter.post("/purchase", purchaseCourse);
 
 export default userRouter;
