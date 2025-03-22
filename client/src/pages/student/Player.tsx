@@ -7,29 +7,146 @@ import { assets } from "../../assets/assets";
 import humanizeDuration from "humanize-duration";
 import YouTube from "react-youtube";
 import Rating from "../../components/student/Rating";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 type playerContentType = ChapterContent & {
   [key: string]: string | number | boolean | null;
 };
 
+type ProgressDataType = {
+  completed: boolean;
+  courseId: string;
+  lectureCompleted: string[];
+  userId: string;
+  _id: string;
+};
+
 export default function Player() {
-  const { enrolledCourses, calculateChapterDuration } = useAppContext();
+  const {
+    enrolledCourses,
+    calculateChapterDuration,
+    backendUrl,
+    getToken,
+    userData,
+    fetchEnrolledCourses,
+  } = useAppContext();
   const { courseId } = useParams();
   const [courseData, setCourseData] = useState<Course | null>(null);
   const [openSections, setOpenSections] = useState<{ [key: number]: boolean }>({});
   const [playerData, setPlayerData] = useState<playerContentType | null>(null);
+  const [progressData, setProgressData] = useState<ProgressDataType | null>(null);
+  const [initialRating, setInitialRating] = useState(0);
 
-  useEffect(() => {
-    enrolledCourses.map((course: Course) => {
+  const getCourseData = () => {
+    enrolledCourses.map((course) => {
       if (course._id === courseId) {
         setCourseData(course);
+        course.courseRatings.map((item) => {
+          if (item.userId === userData?._id) {
+            setInitialRating(item.rating);
+          }
+        });
       }
     });
-  }, [enrolledCourses, courseId]);
+  };
 
   const toggleSection = (index: number) => {
     setOpenSections((prev) => ({ ...prev, [index]: !prev[index] }));
   };
+
+  const markLectureAsCompleted = async (lectureId: string) => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/user/update-course-progress",
+        {
+          courseId,
+          lectureId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        getCourseProgress();
+      } else {
+        toast.error(data.message);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleRate = async (rating: number) => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/user/add-course-rating",
+        {
+          courseId,
+          rating,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        fetchEnrolledCourses();
+      } else {
+        toast.error(data.message);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const getCourseProgress = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/user/get-course-progress",
+        {
+          courseId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(data);
+      if (data.success) {
+        setProgressData(data.progressData);
+      } else {
+        toast.error(data.message);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    getCourseProgress();
+  }, []);
+
+  useEffect(() => {
+    if (enrolledCourses.length > 0) {
+      getCourseData();
+    }
+  }, [enrolledCourses]);
 
   return courseData ? (
     <>
@@ -75,7 +192,14 @@ export default function Player() {
                       (chapterContent: ChapterContent, index) => (
                         <li key={index} className="flex items-start gap-2 py-1">
                           <img
-                            src={false ? assets.play_icon : assets.blue_tick_icon}
+                            src={
+                              progressData &&
+                              progressData.lectureCompleted.includes(
+                                chapterContent.lectureId
+                              )
+                                ? assets.blue_tick_icon
+                                : assets.play_icon
+                            }
                             alt="Play icon"
                             className="w-4 h-4 mt-1"
                           />
@@ -117,7 +241,7 @@ export default function Player() {
 
           <div className="flex items-center gap-2 py-3 mt-10">
             <h2 className="text-2xl">Rate this course</h2>
-            <Rating initialRating={0} />
+            <Rating initialRating={initialRating} onRate={handleRate} />
           </div>
         </div>
         {/* right column */}
@@ -132,8 +256,14 @@ export default function Player() {
                 <p>
                   {playerData.chapter}.{playerData.lecture} {playerData.lectureTitle}
                 </p>
-                <button className="text-blue-600 cursor-pointer">
-                  {false ? "Completed" : "Mark complete"}
+                <button
+                  className="text-blue-600 cursor-pointer"
+                  onClick={() => markLectureAsCompleted(playerData.lectureId)}
+                >
+                  {progressData &&
+                  progressData.lectureCompleted.includes(playerData.lectureId)
+                    ? "Completed"
+                    : "Mark complete"}
                 </button>
               </div>
             </div>

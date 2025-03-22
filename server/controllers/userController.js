@@ -44,7 +44,7 @@ export const purchaseCourse = async (req, res) => {
     const purchaseData = {
       courseId: courseData._id,
       userId,
-      amount: (courseData.coursPrice - courseData.discount * courseData.coursPrice / 100).toFixed(2),
+      amount: courseData.coursePrice - (courseData.discount * courseData.coursePrice / 100).toFixed(2),
     };
 
     const newPurchase = await Purchase.create(purchaseData);
@@ -64,9 +64,6 @@ export const purchaseCourse = async (req, res) => {
       },
       quantity: 1
     }];
-
-    console.log("🚀 ~ userController.js:66 ~ purchaseCourse ~ line_items:", line_items);
-
 
 
     const session = await stripeInstance.checkout.sessions.create({
@@ -139,16 +136,19 @@ export const addUserRating = async (req, res) => {
     if (!user || !user.enrolledCourses.includes(courseId)) return res.json({ success: false, message: "User has not purchased this course" });
 
     const existingRatingIndex = course.courseRatings.findIndex(r => r.userId === userId);
+
     if (existingRatingIndex > -1) {
       course.courseRatings[existingRatingIndex].rating = rating;
+      console.log("exist");
+
     } else {
-      course.courseRatings.pull({
+
+      course.courseRatings.push({
         userId,
         rating
       });
-
-      await course.save();
     }
+    await course.save();
     return res.json({ success: true, message: "Rating added" });
   } catch (error) {
     return res.json({ success: false, message: error.message });

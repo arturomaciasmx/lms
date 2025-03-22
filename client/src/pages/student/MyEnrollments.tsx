@@ -1,22 +1,69 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { Line } from "rc-progress";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+export type ProgressArrayType = {
+  totalLectures: number;
+  lectureCompleted: number;
+};
 
 export default function MyEnrollments() {
-  const { enrolledCourses, calculateCourseDuration, navigate } = useAppContext();
-  const [progressArray, setProgressArray] = useState([
-    { lectureCompleted: 2, totalLectures: 4 },
-    { lectureCompleted: 1, totalLectures: 5 },
-    { lectureCompleted: 3, totalLectures: 6 },
-    { lectureCompleted: 2, totalLectures: 2 },
-    { lectureCompleted: 5, totalLectures: 10 },
-    { lectureCompleted: 0, totalLectures: 3 },
-    { lectureCompleted: 7, totalLectures: 7 },
-    { lectureCompleted: 6, totalLectures: 12 },
-    { lectureCompleted: 2, totalLectures: 4 },
-    { lectureCompleted: 7, totalLectures: 9 },
-    { lectureCompleted: 9, totalLectures: 10 },
-  ]);
+  const {
+    enrolledCourses,
+    calculateCourseDuration,
+    navigate,
+    userData,
+    fetchEnrolledCourses,
+    backendUrl,
+    getToken,
+    calcutateTotalChapters,
+  } = useAppContext();
+
+  const [progressArray, setProgressArray] = useState<ProgressArrayType[]>([]);
+
+  const getCourseProgress = async () => {
+    try {
+      const token = await getToken();
+      const tempProgressArray = await Promise.all(
+        enrolledCourses.map(async (course) => {
+          const { data } = await axios.post(
+            backendUrl + "/api/user/get-course-progress",
+            {
+              courseId: course._id,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const totalLectures = calcutateTotalChapters(course);
+          const lectureCompleted = data.progressData
+            ? data.progressData.lectureCompleted.length
+            : 0;
+
+          return { totalLectures, lectureCompleted };
+        })
+      );
+      setProgressArray(tempProgressArray);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (userData) {
+      fetchEnrolledCourses();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (enrolledCourses.length > 0) {
+      getCourseProgress();
+    }
+  }, [enrolledCourses]);
+
   return (
     <>
       <div className="md:px-36 px-8 pt-10 pb-10">
@@ -68,7 +115,8 @@ export default function MyEnrollments() {
                    py-1.5 bg-blue-600 max-sm:text-xs text-white cursor-pointer"
                     onClick={() => navigate("/player/" + course._id)}
                   >
-                    {progressArray[i].lectureCompleted === progressArray[i].totalLectures
+                    {progressArray[i] &&
+                    progressArray[i].lectureCompleted === progressArray[i].totalLectures
                       ? "Completed"
                       : "On going"}
                   </button>

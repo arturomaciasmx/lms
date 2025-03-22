@@ -12,8 +12,8 @@ userRouter.post("/purchase", purchaseCourse);
 // user course progress
 userRouter.post("/update-course-progress", updateUserCourseProgress);
 // get course progress
-userRouter.get("/get-course-progress", getUserCourseProgress);
+userRouter.post("/get-course-progress", getUserCourseProgress);
 // add course rating
-userRouter.get("/add-course-rating", addUserRating);
+userRouter.post("/add-course-rating", addUserRating);
 
 export default userRouter;

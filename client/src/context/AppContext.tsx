@@ -1,40 +1,80 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Chapter, ChapterContent, Course } from "../types";
-import { dummyCourses } from "../assets/assets";
+import { Chapter, ChapterContent, Course, User } from "../types";
 import { type NavigateFunction, useNavigate } from "react-router-dom";
 import humanizeDuration from "humanize-duration";
 import { useAuth, useUser } from "@clerk/clerk-react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 type AppContextType = {
   currency?: string;
   allCourses: Course[];
   navigate: NavigateFunction;
   calculateRating: (course: Course) => number;
-  setIsEducator?: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsEducator: React.Dispatch<React.SetStateAction<boolean>>;
   isEducator?: boolean;
   calculateChapterDuration: (chapter: Chapter) => string;
   calculateCourseDuration: (course: Course) => string;
   calcutateTotalChapters: (course: Course) => number;
   enrolledCourses: Course[];
   fetchEnrolledCourses: () => void;
+  backendUrl: string;
+  userData: User | null;
+  setUserData: React.Dispatch<React.SetStateAction<User | null>>;
+  getToken: () => Promise<string | null>;
+  fetchAllCourses: () => Promise<void>;
 };
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
   const currency = import.meta.env.VITE_CURRENCY || "USD";
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
 
   const { getToken } = useAuth();
   const { user } = useUser();
 
   const [allCourses, setAllCourses] = useState<Course[]>([]);
-  const [isEducator, setIsEducator] = useState(true);
+  const [isEducator, setIsEducator] = useState(false);
   const [enrolledCourses, setEnroledCourses] = useState<Course[]>([]);
+  const [userData, setUserData] = useState<User | null>(null);
 
   // Fetch all courses
   const fetchAllCourses = async () => {
-    setAllCourses(dummyCourses);
+    try {
+      const { data } = await axios.get(backendUrl + "/api/course/all");
+      if (data.success) {
+        setAllCourses(data.courses);
+      } else {
+        toast.error(data.message);
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const fetchUserData = async () => {
+    if (user?.publicMetadata.role === "educator") setIsEducator(true);
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(backendUrl + "/api/user/data", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (data.success) {
+        setUserData(data.user);
+      } else {
+        toast.error(data.message);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   // Calculate course rating
@@ -45,26 +85,37 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     course.courseRatings.forEach((rating) => {
       totalRating += rating.rating;
     });
-    return totalRating / course.courseRatings.length;
+    return Math.floor(totalRating / course.courseRatings.length);
   };
 
   // fetch enrolled courses
   const fetchEnrolledCourses = async () => {
-    setEnroledCourses(dummyCourses);
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(backendUrl + "/api/user/enrolled-courses", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (data.success) {
+        setEnroledCourses(data.enrolledCourses.reverse());
+      } else {
+        toast.error(data.message);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
     fetchAllCourses();
-    fetchEnrolledCourses();
   }, []);
-
-  const logToken = async () => {
-    console.log(await getToken());
-  };
 
   useEffect(() => {
     if (user) {
-      logToken();
+      fetchUserData();
+      fetchEnrolledCourses();
     }
   }, [user]);
 
@@ -111,6 +162,11 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     calcutateTotalChapters,
     fetchEnrolledCourses,
     enrolledCourses,
+    backendUrl,
+    fetchAllCourses,
+    getToken,
+    setUserData,
+    userData,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

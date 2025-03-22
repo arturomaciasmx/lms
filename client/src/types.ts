@@ -30,7 +30,7 @@ export type Course = {
   isPublished: boolean;
   discount: number;
   courseContent: Chapter[];
-  educator: string;
+  educator: { _id: string; name: string; imageUrl: string };
   enrolledStudents: string[];
   courseRatings: CourseRating[];
   createdAt: string;
@@ -60,6 +60,13 @@ export type Student = {
   _id: string;
   name: string;
   imageUrl: string;
+};
+
+export type User = {
+  _id: string;
+  name: string;
+  imageUrl: string;
+  enrolledCourses: string[];
 };
 
 export type StudentEnrolled = {
