@@ -14,9 +14,9 @@ export default function CourseDetails() {
   const [courseData, setCourseData] = useState<null | Course>(null);
   const [openSections, setOpenSections] = useState<{ [key: number]: boolean }>({});
   const [isAreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
-  const [playerData, setPlayerData] = useState<{ [key: string]: string | null } | null>(
-    null
-  );
+  const [playerData, setPlayerData] = useState<{
+    [key: string]: string | undefined;
+  } | null>(null);
 
   const {
     calculateRating,
@@ -184,7 +184,8 @@ export default function CourseDetails() {
                                 onClick={() =>
                                   setPlayerData({
                                     videoId:
-                                      chapterContent.lectureUrl.split("/").pop() || null,
+                                      chapterContent.lectureUrl.split("/").pop() ||
+                                      undefined,
                                   })
                                 }
                               >
