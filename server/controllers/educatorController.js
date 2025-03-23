@@ -26,12 +26,13 @@ export const updateRoleToEducator = async (req, res) => {
 export const addCourse = async (req, res) => {
   try {
     const { courseData } = req.body;
+    console.log(req);
+
     const imageFile = req.file;
     const educatorId = req.auth.userId;
 
     // return if not image
     if (!imageFile) return res.json({ success: false, message: "Thumbnail not atached" });
-    console.log("🚀 ~ educatorController.js:32 ~ addCourse ~ imageFile:", imageFile);
 
     const parsedCourseData = await JSON.parse(courseData);
     parsedCourseData.educator = educatorId;
@@ -87,7 +88,7 @@ export const getEducatorDashboardData = async (req, res) => {
         _id: { $in: course.enrolledStudents }
       }, "name imageUrl");
 
-      students.foreach(student => {
+      students.forEach(student => {
         enrolledStudentsData.push({
           courseTitle: course.courseTitle,
           student
@@ -96,6 +97,8 @@ export const getEducatorDashboardData = async (req, res) => {
     }
     return res.json({ success: true, dashboardData: { totalEarnings, enrolledStudentsData, totalCourses } });
   } catch (error) {
+    console.log("🚀 ~ educatorController.js:100 ~ getEducatorDashboardData ~ error:", error);
+
     return res.json({ success: false, message: error.message });
   }
 };
@@ -111,6 +114,8 @@ export const getEnrolledStudentsData = async (req, res) => {
       courseId: { $in: courseIds },
       status: "completed"
     }).populate("userId", "name imageUrl").populate("courseId", "courseTitle");
+    console.log("🚀 ~ educatorController.js:115 ~ getEnrolledStudentsData ~ purchases:", purchases);
+
 
     const enrolledStudents = purchases.map(purchase => ({
       student: purchase.userId,
@@ -121,6 +126,7 @@ export const getEnrolledStudentsData = async (req, res) => {
     return res.json({ success: true, enrolledStudents });
 
   } catch (error) {
+    console.log("🚀 ~ educatorController.js:126 ~ getEnrolledStudentsData ~ error:", error);
     return res.json({ success: false, message: error.message });
   }
 };

@@ -1,16 +1,37 @@
 import { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
-import { assets, dummyDashboardData } from "../../assets/assets";
+import { assets } from "../../assets/assets";
 import { DashboardData } from "../../types";
 import Loading from "../../components/student/Loading";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function Dashboard() {
-  const { currency } = useAppContext();
+  const { currency, backendUrl, isEducator, getToken } = useAppContext();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
 
+  const fetchDashboardData = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(backendUrl + "/api/educator/dashboard", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (data.success) {
+        setDashboardData(data.dashboardData);
+      } else {
+        toast.error(data.message);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
-    setDashboardData(dummyDashboardData);
-  }, []);
+    if (isEducator) {
+      fetchDashboardData();
+    }
+  }, [isEducator]);
 
   return dashboardData ? (
     <div className="min-h-screen flex flex-col items-start gap-8 md:p-8 md:pb-0 p-4 pt-8 pb-0">

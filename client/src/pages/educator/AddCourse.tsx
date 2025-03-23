@@ -3,12 +3,16 @@ import { Chapter, ChapterContent, LectureDetail } from "../../types";
 import uniqid from "uniqid";
 import Quill from "quill";
 import { assets } from "../../assets/assets";
+import { useAppContext } from "../../context/AppContext";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 type ChapterWithState = Chapter & {
   collapsed: boolean;
 };
 
 export default function AddCourse() {
+  const { backendUrl, getToken } = useAppContext();
   const quillRef = useRef<Quill | null>(null);
   const editorRef = useRef(null);
 
@@ -102,9 +106,55 @@ export default function AddCourse() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("submit");
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+      if (!image) {
+        toast.error("Thumbnail not selected");
+      }
+
+      const courseData = {
+        courseTitle,
+        courseDescription: quillRef.current?.root.innerHTML,
+        coursePrice,
+        discount,
+        courseContent: chapters,
+      };
+
+      const formData = new FormData();
+      formData.append("courseData", JSON.stringify(courseData));
+      if (image) {
+        formData.append("image", image);
+      }
+
+      const token = await getToken();
+
+      const { data } = await axios.post(
+        backendUrl + "/api/educator/add-course",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        setCourseTitle("");
+        setCoursePrice(0);
+        setDiscount(0);
+        setImage(null);
+        setChapters([]);
+        quillRef.current!.root.innerHTML = "";
+      } else {
+        toast.error(data.message);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (
